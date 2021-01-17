@@ -28,7 +28,7 @@ Additional packages used to build this project:
 ## Development NPM packages
 These are packages i used for development and testing:
 
-* [eslint](https://www.npmjs.com/package/elint)
+* [eslint](https://www.npmjs.com/package/eslint)
 * [faker](https://www.npmjs.com/package/faker)
 * [jest](https://www.npmjs.com/package/jest)
 * [nodemon](https://www.npmjs.com/package/nodemon)
