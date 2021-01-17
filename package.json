@@ -1,0 +1,19 @@
+{
+  "name": "teenyurl_backend",
+  "version": "1.0.0",
+  "description": "A URL shortening API",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcocadete/teenyURL_backend.git"
+  },
+  "author": "Marco Cadete",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marcocadete/teenyURL_backend/issues"
+  },
+  "homepage": "https://github.com/marcocadete/teenyURL_backend#readme"
+}
