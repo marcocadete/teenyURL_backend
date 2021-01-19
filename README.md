@@ -31,6 +31,7 @@ These are packages i used for development and testing:
 * [eslint](https://www.npmjs.com/package/eslint)
 * [faker](https://www.npmjs.com/package/faker)
 * [jest](https://www.npmjs.com/package/jest)
+* [sinon](https://www.npmjs.com/package/sinon)
 * [nodemon](https://www.npmjs.com/package/nodemon)
 * [prettier](https://www.npmjs.com/package/prettier)
 * [supertest](https://www.npmjs.com/package/supertest)  

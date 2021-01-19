@@ -1,6 +1,7 @@
 const request = require("supertest");
 const FakeTeenyUrl = require("./fake_data");
-
+const sinon = require("sinon");
+const TeenyURL = require("../../models/teenyURL");
 let server;
 
 describe("Route /api/v1/ for the teeny url api", () => {
@@ -26,29 +27,70 @@ describe("Route /api/v1/ for the teeny url api", () => {
     });
 
     describe("GET /teenyurls", () => {
-        it("Should return a status Code of 200", async (done) => {
-            const res = await request(server).get("/api/v1/teenyurls");
-            expect(res.status).toBe(200);
-            done();
+        describe("200 SUCCESS", () => {
+            it("Should return a status Code of 200", async (done) => {
+                const res = await request(server).get("/api/v1/teenyurls");
+                expect(res.status).toBe(200);
+                done();
+            });
+
+            it("Should return a JSON body", async (done) => {
+                const res = await request(server).get("/api/v1/teenyurls");
+                expect(res.get("Content-Type")).toMatch(/json/);
+                done();
+            });
+
+            it("Should return the first 50 teeny urls", async (done) => {
+                const res = await request(server).get("/api/v1/teenyurls");
+                expect(res.body.teenyURLs.length).toBe(50);
+                done();
+            });
+
+            it("Should return an empty array if there are no teenyURLs", async (done) => {
+                await FakeTeenyUrl.deleteAll();
+                const res = await request(server).get("/api/v1/teenyurls");
+                expect(res.body.teenyURLs.length).toBe(0);
+                done();
+            });
         });
 
-        it("Should return a JSON body", async (done) => {
-            const res = await request(server).get("/api/v1/teenyurls");
-            expect(res.get("Content-Type")).toMatch(/json/);
-            done();
-        });
+        describe("500 INTERNAL SERVER ERROR", () => {
+            it("Should return a status code of 500", async (done) => {
+                const stub = sinon
+                    .stub(TeenyURL, "fetchAll")
+                    .throws(Error("db query failed"));
+                const res = await request(server).get("/api/v1/teenyurls");
+                expect(res.status).toBe(500);
+                stub.restore();
+                done();
+            });
 
-        it("Should return the first 50 teeny urls", async (done) => {
-            const res = await request(server).get("/api/v1/teenyurls");
-            expect(res.body.teenyURLs.length).toBe(50);
-            done();
-        });
+            it("Should return a JSON body", async (done) => {
+                const stub = sinon
+                    .stub(TeenyURL, "fetchAll")
+                    .throws(Error("db query failed"));
+                const res = await request(server).get("/api/v1/teenyurls");
+                expect(res.get("Content-Type")).toMatch(/json/);
+                stub.restore();
+                done();
+            });
 
-        it("Should return an empty array if there are no teenyURLs", async (done) => {
-            await FakeTeenyUrl.deleteAll();
-            const res = await request(server).get("/api/v1/teenyurls");
-            expect(res.body.teenyURLs.length).toBe(0);
-            done();
+            it("Should return correct error response", async (done) => {
+                const expectedErrorResponse = {
+                    message: "Internal Error",
+                    status: 500,
+                    errors: [],
+                };
+                const stub = sinon
+                    .stub(TeenyURL, "fetchAll")
+                    .throws(Error("db query failed"));
+                const res = await request(server).get("/api/v1/teenyurls");
+                expect(res.body).toEqual(
+                    expect.objectContaining(expectedErrorResponse)
+                );
+                stub.restore();
+                done();
+            });
         });
     });
 
