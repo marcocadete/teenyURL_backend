@@ -154,4 +154,42 @@ describe("Route /api/v1/ for the teeny url api", () => {
             done();
         });
     });
+
+    describe("POST /shorten", () => {
+        const jsonBody = {
+            alias: "duck",
+            long_url: "https://duckduckgo.com",
+        };
+
+        it("Should return a status code of 201", async () => {
+            const res = await request(server)
+                .post("/api/v1/shorten")
+                .send(jsonBody)
+                .set("Accept", "application/json");
+            expect(res.status).toBe(201);
+        });
+
+        it("Should return a JSON body", async () => {
+            const res = await request(server)
+                .post("/api/v1/shorten")
+                .send(jsonBody)
+                .set("Accept", "application/json");
+
+            expect(res.get("Content-Type")).toMatch(/json/);
+        });
+
+        it("Should create a teenyURL and return it", async () => {
+            const res = await request(server)
+                .post("/api/v1/shorten")
+                .send(jsonBody)
+                .set("Accept", "application/json");
+
+            expect(res.body).toHaveProperty("alias");
+            expect(res.body).toHaveProperty("long_url");
+            expect(res.body).toHaveProperty("created_at");
+            expect(res.body).toEqual(expect.objectContaining(jsonBody));
+            expect(res.body.alias).toEqual("duck");
+            expect(res.body.long_url).toEqual("https://duckduckgo.com");
+        });
+    });
 });

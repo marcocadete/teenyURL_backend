@@ -40,3 +40,23 @@ exports.showOne = async (req, res, next) => {
         next(internalServerError);
     }
 };
+
+exports.createOne = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return next(badRequest(errors.array()));
+    }
+
+    try {
+        const teenyURL = new TeenyURL();
+        teenyURL.alias = req.body.alias;
+        teenyURL.long_url = req.body.long_url;
+
+        await teenyURL.save();
+        const [rows] = await TeenyURL.findByAlias(teenyURL.alias);
+        res.status(201).json(rows[0]);
+    } catch (err) {
+        console.log(err);
+        next(internalServerError);
+    }
+};

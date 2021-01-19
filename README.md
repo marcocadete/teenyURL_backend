@@ -85,4 +85,28 @@ Response: **200 SUCCESS** [JSON]
     "created_at": "2021-01-19T02:21:55.000Z"
 }
 ```
+### Creating a teenyURL:  
 
+**POST**/api/v1/shorten
+
+Request Body Schema [JSON]
+
+* **long_URL** *string* [Required]
+* **alias** *string* [Required]
+
+```json
+{
+    "long_URL": "https://distrowatch.com",
+    "alias": "dw"
+}
+```
+
+Response: **200** [JSON]
+
+```json
+{
+    "long_URL": "https://distrowatch.com",
+    "alias": "dw",
+    "created_at": "2021-01-07T14:21:55.000Z"
+}                            
+``` 
