@@ -91,7 +91,7 @@ Response: **200 SUCCESS** [JSON]
 
 Request Body Schema [JSON]
 
-* **long_URL** *string* [Required]
+* **long_url** *string* [Required]
 * **alias** *string* [Required]
 
 ```json
