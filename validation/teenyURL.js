@@ -26,7 +26,7 @@ const validateRequestBody = [
         ),
 ];
 
-const validateRequestParams = [param("alias").isLength({ min: 1, max: 20 })];
+const validateRequestParams = [param("alias").isLength({ min: 1, max: 20 }).withMessage("Alias exceeds 20 character limit.")];
 
 module.exports = {
     validateRequestBody,

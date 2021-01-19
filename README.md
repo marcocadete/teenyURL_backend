@@ -85,6 +85,37 @@ Response: **200 SUCCESS** [JSON]
     "created_at": "2021-01-19T02:21:55.000Z"
 }
 ```
+
+Response: **404 NOT FOUND** [JSON]
+
+```json
+
+{
+    "message": "Not Found",
+    "status": 404,
+    "errors": []
+}
+```
+
+Response: **400 BAD REQUEST** [JSON]
+
+* Occurs if the alias parameter exceeds a character length limit of 20.
+
+```json
+
+{
+    "message": "Bad Request",
+    "status": 400,
+    "errors": [
+        {
+            "value": "a_really_long_alias_that_exceeds_20_characters",
+            "msg": "Alias exceeds 20 character limit.",
+            "param": "alias",
+            "location": "params"
+        }
+    ]
+}
+```
 ### Creating a teenyURL:  
 
 **POST**/api/v1/shorten

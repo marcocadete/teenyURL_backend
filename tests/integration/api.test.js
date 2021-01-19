@@ -43,6 +43,13 @@ describe("Route /api/v1/ for the teeny url api", () => {
             expect(res.body.teenyURLs.length).toBe(50);
             done();
         });
+
+        it("Should return an empty array if there are no teenyURLs", async (done) => {
+            await FakeTeenyUrl.deleteAll();
+            const res = await request(server).get("/api/v1/teenyurls");
+            expect(res.body.teenyURLs.length).toBe(0);
+            done();
+        });
     });
 
     describe("GET /teenyurls?page=1", () => {
@@ -79,6 +86,13 @@ describe("Route /api/v1/ for the teeny url api", () => {
             expect(res.body.teenyURLs[0]).toHaveProperty("created_at");
             done();
         });
+
+        it("Should return an empty array if there are no teenyURLs", async (done) => {
+            await FakeTeenyUrl.deleteAll();
+            const res = await request(server).get("/api/v1/teenyurls");
+            expect(res.body.teenyURLs.length).toBe(0);
+            done();
+        });
     });
 
     describe("GET /teenyurls?limit=5", () => {
@@ -107,51 +121,125 @@ describe("Route /api/v1/ for the teeny url api", () => {
             expect(res.body.teenyURLs[0]).toHaveProperty("created_at");
             done();
         });
+
+        it("Should return an empty array if there are no teenyURLs", async (done) => {
+            await FakeTeenyUrl.deleteAll();
+            const res = await request(server).get("/api/v1/teenyurls");
+            expect(res.body.teenyURLs.length).toBe(0);
+            done();
+        });
     });
 
     describe("GET /teenyurls/:alias", () => {
-        it("Should return a status Code of 200", async (done) => {
-            // Create a teenyUrl for testing
-            const teenyUrl = new FakeTeenyUrl();
-            teenyUrl.alias = "fb";
-            teenyUrl.long_url = "https://facebook.com";
+        describe("200 SUCCESS", () => {
+            it("Should return a status Code of 200", async (done) => {
+                // Create a teenyUrl for testing
+                const teenyUrl = new FakeTeenyUrl();
+                teenyUrl.alias = "fb";
+                teenyUrl.long_url = "https://facebook.com";
 
-            await teenyUrl.save();
+                await teenyUrl.save();
 
-            const res = await request(server).get("/api/v1/teenyurls/fb");
-            expect(res.status).toBe(200);
-            done();
+                const res = await request(server).get("/api/v1/teenyurls/fb");
+                expect(res.status).toBe(200);
+                done();
+            });
+
+            it("Should return a JSON body", async (done) => {
+                // Create a teenyUrl for testing
+                const teenyUrl = new FakeTeenyUrl();
+                teenyUrl.alias = "fb";
+                teenyUrl.long_url = "https://facebook.com";
+
+                await teenyUrl.save();
+
+                const res = await request(server).get("/api/v1/teenyurls/fb");
+                expect(res.get("Content-Type")).toMatch(/json/);
+                done();
+            });
+
+            it("Should find a teeny url by alias and return it", async (done) => {
+                // Create a teenyUrl for testing
+                const teenyUrl = new FakeTeenyUrl();
+                teenyUrl.alias = "fb";
+                teenyUrl.long_url = "https://facebook.com";
+
+                await teenyUrl.save();
+
+                const res = await request(server).get("/api/v1/teenyurls/fb");
+                expect(res.body).toHaveProperty("alias");
+                expect(res.body).toHaveProperty("long_url");
+                expect(res.body).toHaveProperty("created_at");
+                expect(res.body).toEqual(expect.objectContaining(teenyUrl));
+                expect(res.body.alias).toEqual("fb");
+                expect(res.body.long_url).toEqual("https://facebook.com");
+                done();
+            });
         });
 
-        it("Should return a JSON body", async (done) => {
-            // Create a teenyUrl for testing
-            const teenyUrl = new FakeTeenyUrl();
-            teenyUrl.alias = "fb";
-            teenyUrl.long_url = "https://facebook.com";
+        describe("404 NOT FOUND", () => {
+            it("Should return a 404 status code if teenyURL not found", async (done) => {
+                await FakeTeenyUrl.deleteAll();
+                const res = await request(server).get("/api/v1/teenyurls/fb");
+                expect(res.status).toBe(404);
+                done();
+            });
 
-            await teenyUrl.save();
+            it("Should return an error in JSON body ", async (done) => {
+                await FakeTeenyUrl.deleteAll();
+                const res = await request(server).get("/api/v1/teenyurls/fb");
+                expect(res.get("Content-Type")).toMatch(/json/);
+                done();
+            });
 
-            const res = await request(server).get("/api/v1/teenyurls/fb");
-            expect(res.get("Content-Type")).toMatch(/json/);
-            done();
+            it("Should return an error with correct scheme, if teenyURL not found", async (done) => {
+                // The returned error body should match this error.
+                const error = {
+                    message: "Not Found",
+                    status: 404,
+                    errors: [],
+                };
+                await FakeTeenyUrl.deleteAll();
+                const res = await request(server).get("/api/v1/teenyurls/fb");
+                expect(res.body).toEqual(expect.objectContaining(error));
+                done();
+            });
         });
 
-        it("Should find a teeny url by alias and return it", async (done) => {
-            // Create a teenyUrl for testing
-            const teenyUrl = new FakeTeenyUrl();
-            teenyUrl.alias = "fb";
-            teenyUrl.long_url = "https://facebook.com";
+        describe("400 BAD REQUEST", () => {
+            it("Should return a 404 status code if the param value exeeds 20 characters.", async (done) => {
+                const alias = "a".repeat(25); // param exceeds 20 character limit
+                await FakeTeenyUrl.deleteAll();
+                const res = await request(server).get(
+                    `/api/v1/teenyurls/${alias}`
+                );
+                expect(res.status).toBe(400);
+                done();
+            });
 
-            await teenyUrl.save();
+            it("Should return correct error message body", async (done) => {
+                const alias = "a".repeat(25); // param exceeds 20 character limit
 
-            const res = await request(server).get("/api/v1/teenyurls/fb");
-            expect(res.body).toHaveProperty("alias");
-            expect(res.body).toHaveProperty("long_url");
-            expect(res.body).toHaveProperty("created_at");
-            expect(res.body).toEqual(expect.objectContaining(teenyUrl));
-            expect(res.body.alias).toEqual("fb");
-            expect(res.body.long_url).toEqual("https://facebook.com");
-            done();
+                const error = {
+                    message: "Bad Request",
+                    status: 400,
+                    errors: [
+                        {
+                            value: alias,
+                            msg: "Alias exceeds 20 character limit.",
+                            param: "alias",
+                            location: "params",
+                        },
+                    ],
+                };
+                await FakeTeenyUrl.deleteAll();
+                const res = await request(server).get(
+                    `/api/v1/teenyurls/${alias}`
+                );
+
+                expect(res.body).toEqual(expect.objectContaining(error));
+                done();
+            });
         });
     });
 
@@ -161,35 +249,40 @@ describe("Route /api/v1/ for the teeny url api", () => {
             long_url: "https://duckduckgo.com",
         };
 
-        it("Should return a status code of 201", async () => {
-            const res = await request(server)
-                .post("/api/v1/shorten")
-                .send(jsonBody)
-                .set("Accept", "application/json");
-            expect(res.status).toBe(201);
-        });
+        describe("201 CREATED", () => {
+            it("Should return a status code of 201", async (done) => {
+                const res = await request(server)
+                    .post("/api/v1/shorten")
+                    .send(jsonBody)
+                    .set("Accept", "application/json");
+                expect(res.status).toBe(201);
+                done();
+            });
 
-        it("Should return a JSON body", async () => {
-            const res = await request(server)
-                .post("/api/v1/shorten")
-                .send(jsonBody)
-                .set("Accept", "application/json");
+            it("Should return a JSON body", async (done) => {
+                const res = await request(server)
+                    .post("/api/v1/shorten")
+                    .send(jsonBody)
+                    .set("Accept", "application/json");
 
-            expect(res.get("Content-Type")).toMatch(/json/);
-        });
+                expect(res.get("Content-Type")).toMatch(/json/);
+                done();
+            });
 
-        it("Should create a teenyURL and return it", async () => {
-            const res = await request(server)
-                .post("/api/v1/shorten")
-                .send(jsonBody)
-                .set("Accept", "application/json");
+            it("Should create a teenyURL and return it", async (done) => {
+                const res = await request(server)
+                    .post("/api/v1/shorten")
+                    .send(jsonBody)
+                    .set("Accept", "application/json");
 
-            expect(res.body).toHaveProperty("alias");
-            expect(res.body).toHaveProperty("long_url");
-            expect(res.body).toHaveProperty("created_at");
-            expect(res.body).toEqual(expect.objectContaining(jsonBody));
-            expect(res.body.alias).toEqual("duck");
-            expect(res.body.long_url).toEqual("https://duckduckgo.com");
+                expect(res.body).toHaveProperty("alias");
+                expect(res.body).toHaveProperty("long_url");
+                expect(res.body).toHaveProperty("created_at");
+                expect(res.body).toEqual(expect.objectContaining(jsonBody));
+                expect(res.body.alias).toEqual("duck");
+                expect(res.body.long_url).toEqual("https://duckduckgo.com");
+                done();
+            });
         });
     });
 });
