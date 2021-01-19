@@ -46,8 +46,8 @@ app.use((err, req, res, next) => {
 });
 
 const server = app.listen(port, () => {
-    console.log(`Demo app listening on port ${port}`);
-    console.log(`In ${process.env.NODE_ENV}`);
+    //console.log(`Demo app listening on port ${port}`);
+    //console.log(`In ${process.env.NODE_ENV}`);
 });
 
 module.exports = server;

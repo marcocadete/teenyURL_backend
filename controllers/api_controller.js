@@ -1,4 +1,5 @@
 const TeenyURL = require("../models/teenyURL");
+const { validationResult } = require("express-validator");
 const {
     badRequest,
     internalServerError,
@@ -14,6 +15,26 @@ exports.showAll = async (req, res, next) => {
         offset = offset.toString();
         const [rows] = await TeenyURL.fetchAll(limit, offset);
         res.json({ teenyURLs: rows });
+    } catch (err) {
+        console.log(err);
+        next(internalServerError);
+    }
+};
+
+exports.showOne = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return next(badRequest(errors.array()));
+    }
+
+    try {
+        const [rows] = await TeenyURL.findByAlias(req.params.alias);
+
+        if (rows.length === 0) {
+            return next(notFound());
+        }
+
+        res.json(rows[0]);
     } catch (err) {
         console.log(err);
         next(internalServerError);

@@ -14,6 +14,10 @@ module.exports = class FakeTeenyUrl {
         );
     }
 
+    static end() {
+        db.end();
+    }
+
     static createMany(number = 5) {
         // E.g Format: values = [[alias, long_url], [alias, long_url]]
         let values = [];
