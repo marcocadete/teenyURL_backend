@@ -1,27 +1,35 @@
 const request = require("supertest");
+const req = require("express/lib/request");
 const FakeTeenyUrl = require("./fake_data");
 const sinon = require("sinon");
 const TeenyURL = require("../../models/teenyURL");
 let server;
 
 describe("Route /api/v1/ for the teeny url api", () => {
-    beforeAll((done) => {
-        server = require("../../app");
+    beforeAll(async (done) => {
+        //server = require("../../app");
+        await FakeTeenyUrl.deleteAll();
         done();
     });
 
     beforeEach(async (done) => {
+        server = require("../../app");
         await FakeTeenyUrl.createMany(160); // creates 160 teenyUrls
         done();
     });
 
     afterEach(async (done) => {
+        server.close();
         await FakeTeenyUrl.deleteAll();
+        // Restore all the mocks back to their original value
+        // Only works when the mock was created with `jest.spyOn`
+        jest.restoreAllMocks();
         done();
     });
 
-    afterAll((done) => {
-        server.close();
+    afterAll(async (done) => {
+        await FakeTeenyUrl.deleteAll();
+        //server.close();
         FakeTeenyUrl.end();
         done();
     });
@@ -323,6 +331,31 @@ describe("Route /api/v1/ for the teeny url api", () => {
                 expect(res.body).toEqual(expect.objectContaining(jsonBody));
                 expect(res.body.alias).toEqual("duck");
                 expect(res.body.long_url).toEqual("https://duckduckgo.com");
+                done();
+            });
+        });
+        describe("429 TOO MANY REQUESTS", () => {
+            it("Should return a status code of 429", async (done) => {
+                // Mock the `ip` property on the `req` object
+                jest.spyOn(req, "ip", "get").mockReturnValue("1.2.3.4");
+                // Testing the rate limiter, which has been limited to 10 requests.
+                let jsonBodies = [];
+                for (let i = 1; i <= 11; i++) {
+                    jsonBodies.push({
+                        alias: i,
+                        long_url: `http://www.${i}.com`,
+                    });
+                }
+
+                let responses = [];
+                for (let i = 0; i < 11; i++) {
+                    const res = await request(server)
+                        .post("/api/v1/shorten")
+                        .send(jsonBodies[i])
+                        .set("Accept", "application/json");
+                    responses.push(res);
+                }
+                expect(responses[10].status).toBe(429);
                 done();
             });
         });
