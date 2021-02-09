@@ -41,7 +41,9 @@ These are packages i used for development and testing:
 
 **GET** /api/v1/teenyurls
 
-Response: **200 SUCCESS** [JSON]
+Response: **200 SUCCESS** [JSON]  
+
+* When there are one or more teenyURLs  
 
 ```json
 {
@@ -67,6 +69,13 @@ Response: **200 SUCCESS** [JSON]
             "created_at": "2021-01-19T02:20:16.000Z"
         }
     ]
+}
+```
+* When there are no teenyURLs  
+
+```json
+{
+    "teenyURLs": []
 }
 ```
 
