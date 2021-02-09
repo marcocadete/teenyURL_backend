@@ -133,7 +133,7 @@ Request Body Schema [JSON]
 }
 ```
 
-Response: **200** [JSON]
+Response: **200 SUCCESS** [JSON]
 
 ```json
 {
@@ -144,7 +144,7 @@ Response: **200** [JSON]
 ``` 
 
 
-Response: **429** [JSON]  
+Response: **429 TOO MANY REQUESTS** [JSON]  
 
 * Rate limiter set to 10 requests
 
