@@ -142,3 +142,40 @@ Response: **200** [JSON]
     "created_at": "2021-01-07T14:21:55.000Z"
 }                            
 ``` 
+
+
+Response: **429** [JSON]  
+
+* Rate limiter set to 10 requests
+
+```json
+{
+    "message": "Too many requests",
+    "status": 429,
+    "errors": [
+        {
+            "msg": "Too many requests, Please try again later."
+        }
+    ]
+}
+``` 
+
+Response: **400 BAD REQUEST** [JSON]
+
+* Occurs if the alias already exists in the database
+
+```json
+
+{
+    "message": "Bad Request",
+    "status": 400,
+    "errors": [
+        {
+            "value": "some_alias",
+            "msg": "Alias already in use",
+            "param": "alias",
+            "location": "body"
+        }
+    ]
+}
+```

@@ -355,9 +355,57 @@ describe("Route /api/v1/ for the teeny url api", () => {
                         .set("Accept", "application/json");
                     responses.push(res);
                 }
+
+                const error = {
+                    message: "Too many requests",
+                    status: 429,
+                    errors: [
+                        {
+                            msg: "Too many requests, Please try again later."
+                        },
+                    ],
+                };
+
                 expect(responses[10].status).toBe(429);
+                expect(responses[10].get("Content-Type")).toMatch(/json/);
+                expect(responses[10].body).toEqual(expect.objectContaining(error));
                 done();
             });
+
+        });
+
+        describe("400 BAD REQUEST", () => {
+            it("Should return a status code of 400", async (done) => {
+                // Create a teenyUrl for testing
+                const teenyUrl = new FakeTeenyUrl();
+                teenyUrl.alias = "duck";
+                teenyUrl.long_url = "https://duckduckgo.com";
+
+                await teenyUrl.save();
+
+                const error = {
+                    message: "Bad Request",
+                    status: 400,
+                    errors: [
+                        {
+                            value: "duck",
+                            msg: "Alias already in use",
+                            param: "alias",
+                            location: "body",
+                        },
+                    ],
+                };
+
+                const res = await request(server)
+                    .post("/api/v1/shorten")
+                    .send(jsonBody)
+                    .set("Accept", "application/json");
+                expect(res.status).toBe(400);
+                expect(res.get("Content-Type")).toMatch(/json/);
+                expect(res.body).toEqual(expect.objectContaining(error));
+                done();
+            });
+
         });
     });
 });
